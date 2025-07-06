@@ -9,13 +9,18 @@ import com.example.mydividendreminder.data.entity.ProductWithDividends
 import com.example.mydividendreminder.data.entity.Sector
 import com.example.mydividendreminder.data.entity.Dividend
 import com.example.mydividendreminder.data.repository.CombinedRepository
+import com.example.mydividendreminder.domain.model.Stock
+import com.example.mydividendreminder.domain.usecase.GetStockInfoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class ProductViewModel(private val repository: CombinedRepository) : ViewModel() {
+class ProductViewModel(
+    private val repository: CombinedRepository,
+    private val getStockInfo: GetStockInfoUseCase? = null
+) : ViewModel() {
     
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products: StateFlow<List<Product>> = _products.asStateFlow()
@@ -31,6 +36,15 @@ class ProductViewModel(private val repository: CombinedRepository) : ViewModel()
     
     private val _dividends = MutableStateFlow<List<Dividend>>(emptyList())
     val dividends: StateFlow<List<Dividend>> = _dividends.asStateFlow()
+    
+    private val _stockInfo = MutableStateFlow<Stock?>(null)
+    val stockInfo: StateFlow<Stock?> = _stockInfo.asStateFlow()
+    
+    private val _isLoadingStock = MutableStateFlow(false)
+    val isLoadingStock: StateFlow<Boolean> = _isLoadingStock.asStateFlow()
+    
+    private val _stockError = MutableStateFlow<String?>(null)
+    val stockError: StateFlow<String?> = _stockError.asStateFlow()
     
     init {
         loadProducts()
@@ -74,6 +88,32 @@ class ProductViewModel(private val repository: CombinedRepository) : ViewModel()
         }
     }
     
+    fun fetchStockInfo(ticker: String) {
+        if (getStockInfo == null) {
+            _stockError.value = "Stock fetching not available"
+            return
+        }
+        
+        viewModelScope.launch {
+            _isLoadingStock.value = true
+            _stockError.value = null
+            try {
+                val stock = getStockInfo(ticker)
+                _stockInfo.value = stock
+            } catch (e: Exception) {
+                _stockError.value = "Failed to fetch stock info: ${e.message}"
+                _stockInfo.value = null
+            } finally {
+                _isLoadingStock.value = false
+            }
+        }
+    }
+    
+    fun clearStockInfo() {
+        _stockInfo.value = null
+        _stockError.value = null
+    }
+    
     fun addProduct(ticker: String, name: String, isin: String, selectedSectorIds: List<Long> = emptyList()) {
         viewModelScope.launch {
             val product = Product(
@@ -83,6 +123,7 @@ class ProductViewModel(private val repository: CombinedRepository) : ViewModel()
             )
             repository.addProductWithSectors(product, selectedSectorIds)
             loadProducts()
+            clearStockInfo()
         }
     }
     
@@ -137,11 +178,14 @@ class ProductViewModel(private val repository: CombinedRepository) : ViewModel()
         }
     }
     
-    class Factory(private val repository: CombinedRepository) : ViewModelProvider.Factory {
+    class Factory(
+        private val repository: CombinedRepository,
+        private val getStockInfo: GetStockInfoUseCase? = null
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ProductViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return ProductViewModel(repository) as T
+                return ProductViewModel(repository, getStockInfo) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
