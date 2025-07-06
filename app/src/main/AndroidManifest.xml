@@ -32,6 +32,16 @@
             android:exported="false"
             android:label="Sectors"
             android:theme="@style/Theme.MyDividendReminder" />
+        <activity
+            android:name=".AddDividendActivity"
+            android:exported="false"
+            android:label="@string/add_dividend"
+            android:theme="@style/Theme.MyDividendReminder" />
+        <activity
+            android:name=".ProductListActivity"
+            android:exported="false"
+            android:label="Products"
+            android:theme="@style/Theme.MyDividendReminder" />
     </application>
 
 </manifest>

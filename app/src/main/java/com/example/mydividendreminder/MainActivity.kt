@@ -9,18 +9,20 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import android.content.Intent
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mydividendreminder.service.DividendNotificationScheduler
+import com.example.mydividendreminder.ui.screen.MainDashboardScreen
+import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
+import com.example.mydividendreminder.util.NotificationPermissionHelper
 import com.example.mydividendreminder.data.database.AppDatabase
 import com.example.mydividendreminder.data.repository.ProductRepository
 import com.example.mydividendreminder.data.repository.SectorRepository
+import com.example.mydividendreminder.data.repository.DividendRepository
 import com.example.mydividendreminder.data.repository.CombinedRepository
-import com.example.mydividendreminder.service.DividendNotificationScheduler
-import com.example.mydividendreminder.ui.screen.ProductListScreen
-import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
-import com.example.mydividendreminder.util.NotificationPermissionHelper
 
 class MainActivity : FragmentActivity() {
     private lateinit var notificationScheduler: DividendNotificationScheduler
@@ -44,16 +46,28 @@ class MainActivity : FragmentActivity() {
                     val database = AppDatabase.getDatabase(this)
                     val productRepository = ProductRepository(database.productDao())
                     val sectorRepository = SectorRepository(database.sectorDao())
-                    val combinedRepository = CombinedRepository(productRepository, sectorRepository)
+                    val dividendRepository = DividendRepository(database.dividendDao())
+                    val combinedRepository = CombinedRepository(productRepository, sectorRepository, dividendRepository)
                     val productViewModel: ProductViewModel = viewModel(
                         factory = ProductViewModel.Factory(combinedRepository)
                     )
                     
-                    ProductListScreen(
-                        viewModel = productViewModel,
+                    val productsWithDividends by productViewModel.productsWithDividends.collectAsState()
+                    
+                    MainDashboardScreen(
                         modifier = Modifier.padding(innerPadding),
+                        productsWithDividends = productsWithDividends,
+                        onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) },
+                        onNavigateToProducts = {
+                            val intent = Intent(this@MainActivity, ProductListActivity::class.java)
+                            startActivity(intent)
+                        },
                         onNavigateToSectors = {
                             val intent = Intent(this@MainActivity, SectorActivity::class.java)
+                            startActivity(intent)
+                        },
+                        onNavigateToAddDividend = {
+                            val intent = Intent(this@MainActivity, AddDividendActivity::class.java)
                             startActivity(intent)
                         }
                     )

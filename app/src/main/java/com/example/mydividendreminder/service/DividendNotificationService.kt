@@ -12,7 +12,8 @@ import androidx.work.WorkerParameters
 import com.example.mydividendreminder.MainActivity
 import com.example.mydividendreminder.R
 import com.example.mydividendreminder.data.database.AppDatabase
-import com.example.mydividendreminder.data.repository.ProductRepository
+import com.example.mydividendreminder.data.repository.DividendRepository
+import com.example.mydividendreminder.data.entity.Dividend
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -31,8 +32,10 @@ class DividendNotificationService(
     override suspend fun doWork(): Result {
         try {
             val database = AppDatabase.getDatabase(context)
-            val repository = ProductRepository(database.productDao())
-            val upcomingDividends = repository.getUpcomingDividends(7) // Check for next 7 days
+            val repository = DividendRepository(database.dividendDao())
+            val startDate = LocalDate.now()
+            val endDate = startDate.plusDays(7) // Check for next 7 days
+            val upcomingDividends = repository.getUpcomingDividends(startDate, endDate)
 
             if (upcomingDividends.isNotEmpty()) {
                 createNotificationChannel()
@@ -60,7 +63,7 @@ class DividendNotificationService(
         }
     }
 
-    private fun sendNotification(upcomingDividends: List<com.example.mydividendreminder.data.entity.Product>) {
+    private fun sendNotification(upcomingDividends: List<Dividend>) {
         val notificationManager = context.getSystemService(NotificationManager::class.java)
         
         val intent = Intent(context, MainActivity::class.java)
@@ -91,11 +94,11 @@ class DividendNotificationService(
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun buildNotificationContent(dividends: List<com.example.mydividendreminder.data.entity.Product>): String {
+    private fun buildNotificationContent(dividends: List<Dividend>): String {
         return if (dividends.size == 1) {
             val dividend = dividends.first()
             val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), dividend.dividendDate)
-            "${dividend.ticker} dividend of $${dividend.dividendAmount} in $daysUntil days"
+            "Dividend of $${dividend.dividendAmount} in $daysUntil days"
         } else {
             val totalAmount = dividends.sumOf { it.dividendAmount }
             "${dividends.size} dividends totaling $${String.format("%.2f", totalAmount)} coming soon"

@@ -2,13 +2,11 @@
     <string name="app_name">MyDividendReminder</string>
     
     <!-- Product List Screen -->
-    <string name="upcoming_dividends">Upcoming Dividends</string>
-    <string name="sorted_by_nearest_dividend">Sorted by nearest dividend date</string>
+    <string name="all_products">All Products</string>
+    <string name="all_products_description">All products in your portfolio</string>
     <string name="sectors">Sectors</string>
-    <string name="no_upcoming_dividends">No upcoming dividends</string>
-    <string name="add_products_with_future_dividends">Add products with future dividend dates to see them here</string>
-    <string name="today_exclamation">Today!</string>
-    <string name="days_until_dividend">%d days until dividend</string>
+    <string name="no_products">No products</string>
+    <string name="add_products_to_get_started">Add products to get started</string>
     <string name="add_product">Add Product</string>
     
     <!-- Add Product Dialog -->
@@ -49,4 +47,20 @@
     <string name="channel_name">Dividend Reminders</string>
     <string name="channel_description">Notifications for upcoming dividend payments</string>
     <string name="dividend_reminder">Dividend Reminder</string>
+    
+    <!-- Add Dividend Activity -->
+    <string name="add_dividend">Add Dividend</string>
+    <string name="select_product">Select Product</string>
+    <string name="no_product_selected">No product selected</string>
+    <string name="change_product">Change Product</string>
+    <string name="add_dividend_for_product">Add Dividend for %s</string>
+    <string name="ok">OK</string>
+    
+    <!-- Main Dashboard -->
+    <string name="view_products">View Products</string>
+    
+    <!-- New strings added -->
+    <string name="upcoming_dividends">Upcoming Dividends</string>
+    <string name="today_exclamation">Today!</string>
+    <string name="days_until_dividend">%d days until dividend</string>
 </resources>

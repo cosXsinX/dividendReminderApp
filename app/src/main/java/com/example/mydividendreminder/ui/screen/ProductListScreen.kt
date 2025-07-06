@@ -14,6 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.mydividendreminder.R
 import com.example.mydividendreminder.data.entity.Product
+import com.example.mydividendreminder.data.entity.ProductWithDividends
+import com.example.mydividendreminder.data.entity.Dividend
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -23,7 +25,8 @@ import java.time.format.DateTimeFormatter
 fun ProductListScreen(
     viewModel: ProductViewModel,
     modifier: Modifier = Modifier,
-    onNavigateToSectors: () -> Unit = {}
+    onBackPressed: () -> Unit = {},
+    onNavigateToAddDividend: () -> Unit = {}
 ) {
     val products by viewModel.products.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -42,23 +45,31 @@ fun ProductListScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.upcoming_dividends),
+                    text = stringResource(R.string.all_products),
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(
-                    text = stringResource(R.string.sorted_by_nearest_dividend),
+                    text = stringResource(R.string.all_products_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
             Button(
-                onClick = onNavigateToSectors,
-                modifier = Modifier.padding(start = 8.dp)
+                onClick = onBackPressed
             ) {
-                Text(stringResource(R.string.sectors))
+                Text(stringResource(R.string.back))
             }
         }
+        
+        // Add Product Button at the top
+        AddProductButton(
+            sectors = sectors,
+            onAddProduct = { ticker, name, isin, selectedSectorIds ->
+                viewModel.addProduct(ticker, name, isin, selectedSectorIds)
+            },
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
         
         // Notification Settings Section
         NotificationSettingsSection()
@@ -79,13 +90,13 @@ fun ProductListScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.no_upcoming_dividends),
+                        text = stringResource(R.string.no_products),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.add_products_with_future_dividends),
+                        text = stringResource(R.string.add_products_to_get_started),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -99,36 +110,24 @@ fun ProductListScreen(
                     items(products) { product ->
                         ProductCard(
                             product = product,
-                            onDelete = { viewModel.deleteProduct(product) }
+                            onDeleteProduct = { viewModel.deleteProduct(product) },
+                            onNavigateToAddDividend = onNavigateToAddDividend
                         )
                     }
                 }
             }
         }
-        
-        AddProductButton(
-            sectors = sectors,
-            onAddProduct = { ticker, name, isin, dividendDate, dividendAmount, selectedSectorIds ->
-                viewModel.addProduct(ticker, name, isin, dividendDate, dividendAmount, selectedSectorIds)
-            }
-        )
     }
-    
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductCard(
     product: Product,
-    onDelete: () -> Unit,
+    onDeleteProduct: () -> Unit,
+    onNavigateToAddDividend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val daysUntilDividend = java.time.temporal.ChronoUnit.DAYS.between(
-        LocalDate.now(), 
-        product.dividendDate
-    )
-    
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -150,23 +149,15 @@ fun ProductCard(
                         text = "ISIN: ${product.isin}",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    Text(
-                        text = "Dividend Date: ${product.dividendDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Amount: $${product.dividendAmount}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = if (daysUntilDividend == 0L) stringResource(R.string.today_exclamation) else stringResource(R.string.days_until_dividend, daysUntilDividend),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (daysUntilDividend <= 7) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
                 
-                IconButton(onClick = onDelete) {
-                    Text("×", style = MaterialTheme.typography.headlineMedium)
+                Column {
+                    IconButton(onClick = onDeleteProduct) {
+                        Text("×", style = MaterialTheme.typography.headlineMedium)
+                    }
+                    IconButton(onClick = onNavigateToAddDividend) {
+                        Text("+", style = MaterialTheme.typography.headlineMedium)
+                    }
                 }
             }
         }
@@ -176,7 +167,7 @@ fun ProductCard(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AddProductButton(
-    onAddProduct: (String, String, String, LocalDate, Double, List<Long>) -> Unit,
+    onAddProduct: (String, String, String, List<Long>) -> Unit,
     sectors: List<com.example.mydividendreminder.data.entity.Sector>,
     modifier: Modifier = Modifier
 ) {
@@ -184,7 +175,7 @@ fun AddProductButton(
     
     Button(
         onClick = { showDialog = true },
-        modifier = modifier.padding(16.dp)
+        modifier = modifier
     ) {
         Text(stringResource(R.string.add_product))
     }
@@ -193,8 +184,8 @@ fun AddProductButton(
         AddProductDialog(
             sectors = sectors,
             onDismiss = { showDialog = false },
-            onConfirm = { ticker, name, isin, dividendDate, dividendAmount, selectedSectorIds ->
-                onAddProduct(ticker, name, isin, dividendDate, dividendAmount, selectedSectorIds)
+            onConfirm = { ticker, name, isin, selectedSectorIds ->
+                onAddProduct(ticker, name, isin, selectedSectorIds)
                 showDialog = false
             }
         )
@@ -207,15 +198,11 @@ fun AddProductButton(
 fun AddProductDialog(
     sectors: List<com.example.mydividendreminder.data.entity.Sector>,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, LocalDate, Double, List<Long>) -> Unit
+    onConfirm: (String, String, String, List<Long>) -> Unit
 ) {
     var ticker by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var isin by remember { mutableStateOf("") }
-    var dayInput by remember { mutableStateOf(LocalDate.now().dayOfMonth.toString()) }
-    var monthInput by remember { mutableStateOf(LocalDate.now().monthValue.toString()) }
-    var yearInput by remember { mutableStateOf(LocalDate.now().year.toString()) }
-    var dividendAmount by remember { mutableStateOf("") }
     var selectedSectorIds by remember { mutableStateOf(setOf<Long>()) }
     
     AlertDialog(
@@ -241,65 +228,6 @@ fun AddProductDialog(
                     value = isin,
                     onValueChange = { isin = it },
                     label = { Text(stringResource(R.string.isin)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Date selection
-                Text(
-                    text = stringResource(R.string.dividend_date),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Day input
-                    TextField(
-                        value = dayInput,
-                        onValueChange = { 
-                            if (it.length <= 2 && (it.isEmpty() || it.toIntOrNull() != null)) {
-                                dayInput = it
-                            }
-                        },
-                        label = { Text(stringResource(R.string.day)) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-                    
-                    // Month input
-                    TextField(
-                        value = monthInput,
-                        onValueChange = { 
-                            if (it.length <= 2 && (it.isEmpty() || it.toIntOrNull() != null)) {
-                                monthInput = it
-                            }
-                        },
-                        label = { Text(stringResource(R.string.month)) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-                    
-                    // Year input
-                    TextField(
-                        value = yearInput,
-                        onValueChange = { 
-                            if (it.length <= 4 && (it.isEmpty() || it.toIntOrNull() != null)) {
-                                yearInput = it
-                            }
-                        },
-                        label = { Text(stringResource(R.string.year)) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
-                    value = dividendAmount,
-                    onValueChange = { dividendAmount = it },
-                    label = { Text(stringResource(R.string.dividend_amount)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -345,16 +273,7 @@ fun AddProductDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    try {
-                        val day = dayInput.toIntOrNull() ?: LocalDate.now().dayOfMonth
-                        val month = monthInput.toIntOrNull() ?: LocalDate.now().monthValue
-                        val year = yearInput.toIntOrNull() ?: LocalDate.now().year
-                        val selectedDate = LocalDate.of(year, month, day)
-                        val amount = dividendAmount.toDouble()
-                        onConfirm(ticker, name, isin, selectedDate, amount, selectedSectorIds.toList())
-                    } catch (e: Exception) {
-                        // Handle invalid input
-                    }
+                    onConfirm(ticker, name, isin, selectedSectorIds.toList())
                 }
             ) {
                 Text(stringResource(R.string.add))

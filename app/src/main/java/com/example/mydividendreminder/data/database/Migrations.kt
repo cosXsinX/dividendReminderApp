@@ -26,4 +26,46 @@ object Migrations {
             """)
         }
     }
+
+    val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            // Create dividends table
+            database.execSQL("""
+                CREATE TABLE IF NOT EXISTS dividends (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    productId INTEGER NOT NULL,
+                    dividendDate TEXT NOT NULL,
+                    dividendAmount REAL NOT NULL,
+                    FOREIGN KEY(productId) REFERENCES products(id) ON DELETE CASCADE
+                )
+            """)
+            
+            // Migrate existing dividend data from products table to dividends table
+            database.execSQL("""
+                INSERT INTO dividends (productId, dividendDate, dividendAmount)
+                SELECT id, dividendDate, dividendAmount FROM products
+                WHERE dividendDate IS NOT NULL AND dividendAmount IS NOT NULL
+            """)
+            
+            // Create temporary table with new schema
+            database.execSQL("""
+                CREATE TABLE products_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    ticker TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    isin TEXT NOT NULL
+                )
+            """)
+            
+            // Copy data to new table
+            database.execSQL("""
+                INSERT INTO products_new (id, ticker, name, isin)
+                SELECT id, ticker, name, isin FROM products
+            """)
+            
+            // Drop old table and rename new table
+            database.execSQL("DROP TABLE products")
+            database.execSQL("ALTER TABLE products_new RENAME TO products")
+        }
+    }
 } 

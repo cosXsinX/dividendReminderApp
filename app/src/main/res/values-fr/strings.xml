@@ -2,9 +2,13 @@
     <string name="app_name">MonRappelDividende</string>
     
     <!-- Product List Screen -->
+    <string name="all_products">Tous les produits</string>
+    <string name="all_products_description">Tous les produits de votre portefeuille</string>
     <string name="upcoming_dividends">Dividendes à venir</string>
     <string name="sorted_by_nearest_dividend">Triés par date de dividende la plus proche</string>
     <string name="sectors">Secteurs</string>
+    <string name="no_products">Aucun produit</string>
+    <string name="add_products_to_get_started">Ajoutez des produits pour commencer</string>
     <string name="no_upcoming_dividends">Aucun dividende à venir</string>
     <string name="add_products_with_future_dividends">Ajoutez des produits avec des dates de dividende futures pour les voir ici</string>
     <string name="today_exclamation">Aujourd\'hui !</string>
@@ -49,4 +53,15 @@
     <string name="channel_name">Rappels de dividendes</string>
     <string name="channel_description">Notifications pour les paiements de dividendes à venir</string>
     <string name="dividend_reminder">Rappel de dividende</string>
+    
+    <!-- Add Dividend Activity -->
+    <string name="add_dividend">Ajouter un dividende</string>
+    <string name="select_product">Sélectionner un produit</string>
+    <string name="no_product_selected">Aucun produit sélectionné</string>
+    <string name="change_product">Changer de produit</string>
+    <string name="add_dividend_for_product">Ajouter un dividende pour %s</string>
+    <string name="ok">OK</string>
+    
+    <!-- Main Dashboard -->
+    <string name="view_products">Voir les produits</string>
 </resources> 
