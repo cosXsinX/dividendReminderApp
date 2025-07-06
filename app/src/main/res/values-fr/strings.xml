@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">MonRappelDividende</string>
+    
+    <!-- Product List Screen -->
+    <string name="upcoming_dividends">Dividendes à venir</string>
+    <string name="sorted_by_nearest_dividend">Triés par date de dividende la plus proche</string>
+    <string name="sectors">Secteurs</string>
+    <string name="no_upcoming_dividends">Aucun dividende à venir</string>
+    <string name="add_products_with_future_dividends">Ajoutez des produits avec des dates de dividende futures pour les voir ici</string>
+    <string name="today_exclamation">Aujourd\'hui !</string>
+    <string name="days_until_dividend">%d jours jusqu\'au dividende</string>
+    <string name="add_product">Ajouter un produit</string>
+    
+    <!-- Add Product Dialog -->
+    <string name="add_new_product">Ajouter un nouveau produit</string>
+    <string name="ticker">Symbole</string>
+    <string name="name">Nom</string>
+    <string name="isin">ISIN</string>
+    <string name="dividend_date">Date du dividende</string>
+    <string name="day">Jour</string>
+    <string name="month">Mois</string>
+    <string name="year">Année</string>
+    <string name="dividend_amount">Montant du dividende</string>
+    <string name="add">Ajouter</string>
+    <string name="cancel">Annuler</string>
+    
+    <!-- Notification Settings -->
+    <string name="notification_settings">Paramètres de notification</string>
+    <string name="expand">+</string>
+    <string name="collapse">−</string>
+    
+    <!-- Sector List Screen -->
+    <string name="back">Retour</string>
+    <string name="add_sector">Ajouter un secteur</string>
+    <string name="add_new_sector">Ajouter un nouveau secteur</string>
+    <string name="sector_name">Nom du secteur</string>
+    <string name="provider_name">Nom du fournisseur</string>
+    <string name="edit_sector">Modifier le secteur</string>
+    <string name="save">Enregistrer</string>
+    
+    <!-- Default Sectors -->
+    <string name="sector_technology">Technologie</string>
+    <string name="sector_healthcare">Santé</string>
+    <string name="sector_finance">Finance</string>
+    <string name="sector_energy">Énergie</string>
+    <string name="sector_consumer_goods">Biens de consommation</string>
+    
+    <!-- Notification Service -->
+    <string name="channel_name">Rappels de dividendes</string>
+    <string name="channel_description">Notifications pour les paiements de dividendes à venir</string>
+    <string name="dividend_reminder">Rappel de dividende</string>
+</resources> 

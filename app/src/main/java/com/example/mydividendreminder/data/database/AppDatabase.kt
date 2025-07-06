@@ -7,16 +7,21 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.mydividendreminder.data.converter.Converters
 import com.example.mydividendreminder.data.dao.ProductDao
+import com.example.mydividendreminder.data.dao.SectorDao
 import com.example.mydividendreminder.data.entity.Product
+import com.example.mydividendreminder.data.entity.Sector
+import com.example.mydividendreminder.data.entity.ProductSectorCrossRef
+import com.example.mydividendreminder.data.database.Migrations
 
 @Database(
-    entities = [Product::class],
-    version = 1,
+    entities = [Product::class, Sector::class, ProductSectorCrossRef::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
+    abstract fun sectorDao(): SectorDao
 
     companion object {
         @Volatile
@@ -28,7 +33,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "dividend_reminder_database"
-                ).build()
+                )
+                .addMigrations(Migrations.MIGRATION_1_2)
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

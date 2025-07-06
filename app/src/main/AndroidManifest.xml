@@ -27,6 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SectorActivity"
+            android:exported="false"
+            android:label="Sectors"
+            android:theme="@style/Theme.MyDividendReminder" />
     </application>
 
 </manifest>

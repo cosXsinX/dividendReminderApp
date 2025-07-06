@@ -4,14 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.mydividendreminder.data.entity.Product
-import com.example.mydividendreminder.data.repository.ProductRepository
+import com.example.mydividendreminder.data.entity.ProductWithSectors
+import com.example.mydividendreminder.data.entity.Sector
+import com.example.mydividendreminder.data.repository.CombinedRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
+class ProductViewModel(private val repository: CombinedRepository) : ViewModel() {
     
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products: StateFlow<List<Product>> = _products.asStateFlow()
@@ -19,13 +21,17 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
+    private val _sectors = MutableStateFlow<List<Sector>>(emptyList())
+    val sectors: StateFlow<List<Sector>> = _sectors.asStateFlow()
+    
     init {
         loadProducts()
+        loadSectors()
     }
     
     fun loadProducts() {
         viewModelScope.launch {
-            repository.getAllProducts().collect { productList ->
+            repository.getFutureDividendProducts().collect { productList ->
                 _products.value = productList
                 if (_isLoading.value) {
                     _isLoading.value = false
@@ -34,7 +40,15 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
     
-    fun addProduct(ticker: String, name: String, isin: String, dividendDate: LocalDate, dividendAmount: Double) {
+    fun loadSectors() {
+        viewModelScope.launch {
+            repository.getAllSectors().collect { sectorList ->
+                _sectors.value = sectorList
+            }
+        }
+    }
+    
+    fun addProduct(ticker: String, name: String, isin: String, dividendDate: LocalDate, dividendAmount: Double, selectedSectorIds: List<Long> = emptyList()) {
         viewModelScope.launch {
             val product = Product(
                 ticker = ticker,
@@ -43,13 +57,15 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
                 dividendDate = dividendDate,
                 dividendAmount = dividendAmount
             )
-            repository.insertProduct(product)
+            repository.addProductWithSectors(product, selectedSectorIds)
+            loadProducts()
         }
     }
     
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
             repository.deleteProduct(product)
+            loadProducts()
         }
     }
     
@@ -59,7 +75,7 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
         }
     }
     
-    class Factory(private val repository: ProductRepository) : ViewModelProvider.Factory {
+    class Factory(private val repository: CombinedRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ProductViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")

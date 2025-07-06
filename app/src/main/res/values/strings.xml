@@ -1,3 +1,52 @@
 <resources>
     <string name="app_name">MyDividendReminder</string>
+    
+    <!-- Product List Screen -->
+    <string name="upcoming_dividends">Upcoming Dividends</string>
+    <string name="sorted_by_nearest_dividend">Sorted by nearest dividend date</string>
+    <string name="sectors">Sectors</string>
+    <string name="no_upcoming_dividends">No upcoming dividends</string>
+    <string name="add_products_with_future_dividends">Add products with future dividend dates to see them here</string>
+    <string name="today_exclamation">Today!</string>
+    <string name="days_until_dividend">%d days until dividend</string>
+    <string name="add_product">Add Product</string>
+    
+    <!-- Add Product Dialog -->
+    <string name="add_new_product">Add New Product</string>
+    <string name="ticker">Ticker</string>
+    <string name="name">Name</string>
+    <string name="isin">ISIN</string>
+    <string name="dividend_date">Dividend Date</string>
+    <string name="day">Day</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+    <string name="dividend_amount">Dividend Amount</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Notification Settings -->
+    <string name="notification_settings">Notification Settings</string>
+    <string name="expand">+</string>
+    <string name="collapse">−</string>
+    
+    <!-- Sector List Screen -->
+    <string name="back">Back</string>
+    <string name="add_sector">Add Sector</string>
+    <string name="add_new_sector">Add New Sector</string>
+    <string name="sector_name">Sector Name</string>
+    <string name="provider_name">Provider Name</string>
+    <string name="edit_sector">Edit Sector</string>
+    <string name="save">Save</string>
+    
+    <!-- Default Sectors -->
+    <string name="sector_technology">Technology</string>
+    <string name="sector_healthcare">Healthcare</string>
+    <string name="sector_finance">Finance</string>
+    <string name="sector_energy">Energy</string>
+    <string name="sector_consumer_goods">Consumer Goods</string>
+    
+    <!-- Notification Service -->
+    <string name="channel_name">Dividend Reminders</string>
+    <string name="channel_description">Notifications for upcoming dividend payments</string>
+    <string name="dividend_reminder">Dividend Reminder</string>
 </resources>
