@@ -23,6 +23,8 @@ import com.example.mydividendreminder.data.repository.SectorRepository
 import com.example.mydividendreminder.data.repository.DividendRepository
 import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
+import com.example.mydividendreminder.util.CsvExportUtil
+import android.widget.Toast
 
 class MainActivity : FragmentActivity() {
     private lateinit var notificationScheduler: DividendNotificationScheduler
@@ -69,6 +71,9 @@ class MainActivity : FragmentActivity() {
                         onNavigateToAddDividend = {
                             val intent = Intent(this@MainActivity, AddDividendActivity::class.java)
                             startActivity(intent)
+                        },
+                        onExportDividends = {
+                            exportDividendsToCsv(productsWithDividends)
                         }
                     )
                 }
@@ -95,6 +100,26 @@ class MainActivity : FragmentActivity() {
         // Ensure notifications are scheduled when app resumes
         if (permissionHelper.hasNotificationPermission()) {
             notificationScheduler.scheduleDailyNotificationCheck()
+        }
+    }
+    
+    private fun exportDividendsToCsv(productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends>) {
+        try {
+            if (productsWithDividends.isEmpty()) {
+                Toast.makeText(this, getString(R.string.no_dividends_to_export), Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            val csvUri = CsvExportUtil.exportDividendsToCsv(this, productsWithDividends)
+            if (csvUri != null) {
+                val shareIntent = CsvExportUtil.createShareIntent(this, csvUri)
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.export_dividends)))
+            } else {
+                Toast.makeText(this, getString(R.string.failed_to_create_csv), Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, getString(R.string.error_exporting_dividends, e.message), Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -55,8 +55,9 @@ class ProductListActivity : FragmentActivity() {
                         onBackPressed = {
                             finish()
                         },
-                        onNavigateToAddDividend = {
+                        onNavigateToAddDividend = { productId ->
                             val intent = Intent(this@ProductListActivity, AddDividendActivity::class.java)
+                            intent.putExtra("PRODUCT_ID", productId)
                             startActivity(intent)
                         }
                     )

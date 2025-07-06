@@ -77,10 +77,12 @@ class AddDividendActivity : ComponentActivity() {
                         factory = ProductViewModel.Factory(combinedRepository, getStockInfoUseCase)
                     )
                     
+                    val productId = intent.getLongExtra("PRODUCT_ID", -1L)
                     AddDividendScreen(
                         viewModel = productViewModel,
                         modifier = Modifier.padding(innerPadding),
-                        onDividendAdded = { finish() }
+                        onDividendAdded = { finish() },
+                        preselectedProductId = if (productId != -1L) productId else null
                     )
                 }
             }
@@ -94,7 +96,8 @@ class AddDividendActivity : ComponentActivity() {
 fun AddDividendScreen(
     viewModel: ProductViewModel,
     modifier: Modifier = Modifier,
-    onDividendAdded: () -> Unit = {}
+    onDividendAdded: () -> Unit = {},
+    preselectedProductId: Long? = null
 ) {
     val products by viewModel.products.collectAsState()
     val productsWithDividends by viewModel.productsWithDividends.collectAsState()
@@ -103,6 +106,16 @@ fun AddDividendScreen(
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
     var showProductSelection by remember { mutableStateOf(false) }
     var showAddDividendDialog by remember { mutableStateOf(false) }
+    
+    // Pre-select product if product ID is provided
+    LaunchedEffect(preselectedProductId, products) {
+        if (preselectedProductId != null && selectedProduct == null) {
+            val product = products.find { it.id == preselectedProductId }
+            if (product != null) {
+                selectedProduct = product
+            }
+        }
+    }
     
     Column(
         modifier = modifier
@@ -436,7 +449,7 @@ fun UpcomingDividendsSection(
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                             Text(
-                                                text = "Amount: $${dividend.dividendAmount}",
+                                                text = "Amount: €${String.format("%.2f", dividend.dividendAmount)}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )

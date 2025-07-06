@@ -21,6 +21,7 @@ fun MainDashboardScreen(
     onNavigateToProducts: () -> Unit = {},
     onNavigateToSectors: () -> Unit = {},
     onNavigateToAddDividend: () -> Unit = {},
+    onExportDividends: () -> Unit = {},
     productsWithDividends: List<ProductWithDividends> = emptyList(),
     onDeleteDividend: (Dividend) -> Unit = {},
     modifier: Modifier = Modifier
@@ -88,9 +89,18 @@ fun MainDashboardScreen(
                 
                 Button(
                     onClick = onNavigateToAddDividend,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
                 ) {
                     Text(stringResource(R.string.add_dividend))
+                }
+                
+                Button(
+                    onClick = onExportDividends,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.export_dividends))
                 }
             }
         }
@@ -164,7 +174,7 @@ fun UpcomingDividendsSection(
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                             Text(
-                                                text = "Amount: $${dividend.dividendAmount}",
+                                                text = "Amount: €${String.format("%.2f", dividend.dividendAmount)}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )

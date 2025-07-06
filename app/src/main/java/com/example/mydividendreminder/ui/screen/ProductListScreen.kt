@@ -27,11 +27,14 @@ fun ProductListScreen(
     viewModel: ProductViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    onNavigateToAddDividend: () -> Unit = {}
+    onNavigateToAddDividend: (Long) -> Unit = {}
 ) {
     val products by viewModel.products.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val sectors by viewModel.sectors.collectAsState()
+    
+    var showEditDialog by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<Product?>(null) }
     
     Column(
         modifier = modifier.fillMaxSize(),
@@ -113,11 +116,38 @@ fun ProductListScreen(
                         ProductCard(
                             product = product,
                             onDeleteProduct = { viewModel.deleteProduct(product) },
-                            onNavigateToAddDividend = onNavigateToAddDividend
+                            onNavigateToAddDividend = { onNavigateToAddDividend(product.id) },
+                            onEditProduct = { product ->
+                                productToEdit = product
+                                showEditDialog = true
+                            }
                         )
                     }
                 }
             }
+        }
+
+        // Edit Product Dialog
+        if (showEditDialog && productToEdit != null) {
+            EditProductDialog(
+                product = productToEdit!!,
+                sectors = sectors,
+                onDismiss = {
+                    showEditDialog = false
+                    productToEdit = null
+                },
+                onConfirm = { ticker, name, isin, selectedSectorIds ->
+                    val updatedProduct = productToEdit!!.copy(
+                        ticker = ticker,
+                        name = name,
+                        isin = isin
+                    )
+                    viewModel.updateProduct(updatedProduct, selectedSectorIds)
+                    showEditDialog = false
+                    productToEdit = null
+                },
+                viewModel = viewModel
+            )
         }
     }
 }
@@ -128,6 +158,7 @@ fun ProductCard(
     product: Product,
     onDeleteProduct: () -> Unit,
     onNavigateToAddDividend: () -> Unit,
+    onEditProduct: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -154,6 +185,9 @@ fun ProductCard(
                 }
                 
                 Column {
+                    IconButton(onClick = { onEditProduct(product) }) {
+                        Text("✏️", style = MaterialTheme.typography.bodyLarge)
+                    }
                     IconButton(onClick = onDeleteProduct) {
                         Text("×", style = MaterialTheme.typography.headlineMedium)
                     }
@@ -208,7 +242,7 @@ fun AddProductDialog(
     var ticker by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var isin by remember { mutableStateOf("") }
-    var selectedSectorIds by remember { mutableStateOf(setOf<Long>()) }
+    var selectedSectorIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     
     val stockInfo by viewModel.stockInfo.collectAsState()
     val isLoadingStock by viewModel.isLoadingStock.collectAsState()
@@ -443,4 +477,105 @@ fun NotificationSettingsSection(
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun EditProductDialog(
+    product: Product,
+    sectors: List<com.example.mydividendreminder.data.entity.Sector>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String, List<Long>) -> Unit,
+    viewModel: ProductViewModel
+) {
+    var ticker by remember { mutableStateOf(product.ticker) }
+    var name by remember { mutableStateOf(product.name) }
+    var isin by remember { mutableStateOf(product.isin) }
+    var selectedSectorIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_product)) },
+        text = {
+            Column {
+                TextField(
+                    value = ticker,
+                    onValueChange = { newTicker ->
+                        ticker = newTicker
+                    },
+                    label = { Text(stringResource(R.string.ticker)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = name,
+                    onValueChange = { newName ->
+                        name = newName
+                    },
+                    label = { Text(stringResource(R.string.name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = isin,
+                    onValueChange = { newIsin ->
+                        isin = newIsin
+                    },
+                    label = { Text(stringResource(R.string.isin)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.sectors),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                
+                if (sectors.isNotEmpty()) {
+                    sectors.forEach { sector ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedSectorIds.contains(sector.id),
+                                onCheckedChange = { checked ->
+                                    selectedSectorIds = if (checked) {
+                                        selectedSectorIds + sector.id
+                                    } else {
+                                        selectedSectorIds - sector.id
+                                    }
+                                }
+                            )
+                            Text(
+                                text = "${sector.name} (${sector.providerName})",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "No sectors available. Please add sectors first.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(ticker, name, isin, selectedSectorIds.toList())
+                },
+                enabled = ticker.isNotEmpty() && name.isNotEmpty() && isin.isNotEmpty()
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 } 

@@ -11,6 +11,7 @@
     
     <!-- Add Product Dialog -->
     <string name="add_new_product">Add New Product</string>
+    <string name="edit_product">Edit Product</string>
     <string name="ticker">Ticker</string>
     <string name="name">Name</string>
     <string name="isin">ISIN</string>
@@ -18,8 +19,9 @@
     <string name="day">Day</string>
     <string name="month">Month</string>
     <string name="year">Year</string>
-    <string name="dividend_amount">Dividend Amount</string>
+    <string name="dividend_amount">Dividend Amount (€)</string>
     <string name="add">Add</string>
+    <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     
     <!-- Notification Settings -->
@@ -34,7 +36,6 @@
     <string name="sector_name">Sector Name</string>
     <string name="provider_name">Provider Name</string>
     <string name="edit_sector">Edit Sector</string>
-    <string name="save">Save</string>
     
     <!-- Default Sectors -->
     <string name="sector_technology">Technology</string>
@@ -63,4 +64,11 @@
     <string name="upcoming_dividends">Upcoming Dividends</string>
     <string name="today_exclamation">Today!</string>
     <string name="days_until_dividend">%d days until dividend</string>
+    
+    <!-- CSV Export -->
+    <string name="export_dividends">Export Dividends</string>
+    <string name="export_dividends_description">Export all dividends to CSV file</string>
+    <string name="no_dividends_to_export">No dividends to export</string>
+    <string name="failed_to_create_csv">Failed to create CSV file</string>
+    <string name="error_exporting_dividends">Error exporting dividends: %s</string>
 </resources>

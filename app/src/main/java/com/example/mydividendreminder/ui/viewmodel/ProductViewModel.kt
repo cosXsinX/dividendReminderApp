@@ -156,9 +156,14 @@ class ProductViewModel(
         }
     }
     
-    fun updateProduct(product: Product) {
+    fun updateProduct(product: Product, selectedSectorIds: List<Long> = emptyList()) {
         viewModelScope.launch {
             repository.updateProduct(product)
+            if (selectedSectorIds.isNotEmpty()) {
+                repository.updateProductSectors(product.id, selectedSectorIds)
+            }
+            loadProducts()
+            clearStockInfo()
         }
     }
     

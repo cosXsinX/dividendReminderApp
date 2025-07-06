@@ -98,10 +98,10 @@ class DividendNotificationService(
         return if (dividends.size == 1) {
             val dividend = dividends.first()
             val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), dividend.dividendDate)
-            "Dividend of $${dividend.dividendAmount} in $daysUntil days"
+            "Dividend of €${String.format("%.2f", dividend.dividendAmount)} in $daysUntil days"
         } else {
             val totalAmount = dividends.sumOf { it.dividendAmount }
-            "${dividends.size} dividends totaling $${String.format("%.2f", totalAmount)} coming soon"
+            "${dividends.size} dividends totaling €${String.format("%.2f", totalAmount)} coming soon"
         }
     }
 } 

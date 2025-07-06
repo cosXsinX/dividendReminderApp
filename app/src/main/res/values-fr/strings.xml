@@ -24,12 +24,13 @@
     <string name="day">Jour</string>
     <string name="month">Mois</string>
     <string name="year">Année</string>
-    <string name="dividend_amount">Montant du dividende</string>
+    <string name="dividend_amount">Montant du dividende (€)</string>
     <string name="add">Ajouter</string>
     <string name="cancel">Annuler</string>
     
     <!-- Notification Settings -->
     <string name="notification_settings">Paramètres de notification</string>
+    <string name="edit_product">Editer le produit</string>
     <string name="expand">+</string>
     <string name="collapse">−</string>
     
@@ -64,4 +65,11 @@
     
     <!-- Main Dashboard -->
     <string name="view_products">Voir les produits</string>
+    
+    <!-- CSV Export -->
+    <string name="export_dividends">Exporter les dividendes</string>
+    <string name="export_dividends_description">Exporter toutes les dividendes vers un fichier CSV</string>
+    <string name="no_dividends_to_export">Aucune dividende à exporter</string>
+    <string name="failed_to_create_csv">Échec de la création du fichier CSV</string>
+    <string name="error_exporting_dividends">Erreur lors de l\'exportation des dividendes : %s</string>
 </resources> 
