@@ -71,4 +71,5 @@
     <string name="no_dividends_to_export">No dividends to export</string>
     <string name="failed_to_create_csv">Failed to create CSV file</string>
     <string name="error_exporting_dividends">Error exporting dividends: %s</string>
+    <string name="api_keys">API Keys</string>
 </resources>

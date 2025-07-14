@@ -68,4 +68,15 @@ object Migrations {
             database.execSQL("ALTER TABLE products_new RENAME TO products")
         }
     }
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("""
+                CREATE TABLE IF NOT EXISTS api_keys (
+                    provider TEXT NOT NULL PRIMARY KEY,
+                    key TEXT NOT NULL
+                )
+            """)
+        }
+    }
 } 

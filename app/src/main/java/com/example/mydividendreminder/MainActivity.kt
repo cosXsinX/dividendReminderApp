@@ -25,6 +25,8 @@ import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
 import com.example.mydividendreminder.util.CsvExportUtil
 import android.widget.Toast
+import com.example.mydividendreminder.ApiKeyActivity
+import com.example.mydividendreminder.PromptActivity
 
 class MainActivity : FragmentActivity() {
     private lateinit var notificationScheduler: DividendNotificationScheduler
@@ -74,6 +76,14 @@ class MainActivity : FragmentActivity() {
                         },
                         onExportDividends = {
                             exportDividendsToCsv(productsWithDividends)
+                        },
+                        onNavigateToApiKeys = {
+                            val intent = Intent(this@MainActivity, ApiKeyActivity::class.java)
+                            startActivity(intent)
+                        },
+                        onNavigateToPrompt = {
+                            val intent = Intent(this@MainActivity, PromptActivity::class.java)
+                            startActivity(intent)
                         }
                     )
                 }

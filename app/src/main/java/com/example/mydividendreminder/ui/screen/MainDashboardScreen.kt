@@ -22,6 +22,8 @@ fun MainDashboardScreen(
     onNavigateToSectors: () -> Unit = {},
     onNavigateToAddDividend: () -> Unit = {},
     onExportDividends: () -> Unit = {},
+    onNavigateToApiKeys: () -> Unit = {},
+    onNavigateToPrompt: () -> Unit = {},
     productsWithDividends: List<ProductWithDividends> = emptyList(),
     onDeleteDividend: (Dividend) -> Unit = {},
     modifier: Modifier = Modifier
@@ -101,6 +103,20 @@ fun MainDashboardScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.export_dividends))
+                }
+
+                Button(
+                    onClick = onNavigateToApiKeys,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    Text("API Keys")
+                }
+
+                Button(
+                    onClick = onNavigateToPrompt,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    Text("Prompt Playground")
                 }
             }
         }
