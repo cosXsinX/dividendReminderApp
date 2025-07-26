@@ -13,13 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import com.example.mydividendreminder.R
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApiKeyScreen(
     viewModel: ApiKeyViewModel,
-    modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
+    modifier: Modifier = Modifier
 ) {
     val openAiKey by viewModel.openAiKey.collectAsState()
     val geminiKey by viewModel.geminiKey.collectAsState()
@@ -29,35 +30,16 @@ fun ApiKeyScreen(
     LaunchedEffect(openAiKey) { openAiInput = openAiKey }
     LaunchedEffect(geminiKey) { geminiInput = geminiKey }
 
-    Scaffold(
-        topBar = {
-            Surface(shadowElevation = 4.dp) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(start = 4.dp, end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "API Keys",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
-        },
-        modifier = modifier
-    ) { innerPadding ->
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DefaultMainAppBar(
+            navigationHelper = navigationHelper
+        )
+        
         Column(
             modifier = Modifier
-                .padding(innerPadding)
                 .padding(16.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(24.dp)

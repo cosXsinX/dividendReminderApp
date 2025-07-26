@@ -8,8 +8,27 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.House
+import androidx.compose.ui.res.stringResource
+import com.example.mydividendreminder.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -33,6 +52,7 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyDividendReminderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -54,5 +74,61 @@ fun MyDividendReminderTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ThemedTopAppBar(
+    title: @Composable () -> Unit = {},
+    navigationIcon: @Composable (() -> Unit) = {},
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    TopAppBar(
+        title = title,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
+}
+
+@Composable
+fun DefaultMainAppBar(
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
+    productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList()
+) {
+    ThemedTopAppBar(
+        title = {}, // No title for main dashboard
+        actions = {
+            IconButton(onClick = navigationHelper.navigateToMain()) {
+                Icon(Icons.Default.House, contentDescription = "Main")
+            }
+            IconButton(onClick = navigationHelper.navigateToHelp()) {
+                Icon(Icons.Default.Help, contentDescription = "Help")
+            }
+            IconButton(onClick = navigationHelper.navigateToProducts()) {
+                Icon(Icons.Filled.List, contentDescription = stringResource(R.string.view_products))
+            }
+            IconButton(onClick = navigationHelper.navigateToSectors()) {
+                Icon(Icons.Filled.Category, contentDescription = stringResource(R.string.sectors))
+            }
+            IconButton(onClick = navigationHelper.navigateToAddDividend()) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_dividend))
+            }
+            IconButton(onClick = navigationHelper.createExportDividendsFunction(productsWithDividends)) {
+                Icon(Icons.Filled.FileDownload, contentDescription = stringResource(R.string.export_dividends))
+            }
+            IconButton(onClick = navigationHelper.navigateToApiKeys()) {
+                Icon(Icons.Filled.VpnKey, contentDescription = "API Keys")
+            }
+            IconButton(onClick = navigationHelper.navigateToPrompt()) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = "Prompt Playground")
+            }
+        }
     )
 }

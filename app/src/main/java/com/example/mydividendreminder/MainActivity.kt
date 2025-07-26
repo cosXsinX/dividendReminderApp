@@ -24,9 +24,13 @@ import com.example.mydividendreminder.data.repository.DividendRepository
 import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
 import com.example.mydividendreminder.util.CsvExportUtil
+import com.example.mydividendreminder.util.DividendExportHelper
+import com.example.mydividendreminder.util.NavigationHelper
 import android.widget.Toast
 import com.example.mydividendreminder.ApiKeyActivity
 import com.example.mydividendreminder.PromptActivity
+import com.example.mydividendreminder.HelpActivity
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 
 class MainActivity : FragmentActivity() {
     private lateinit var notificationScheduler: DividendNotificationScheduler
@@ -35,59 +39,39 @@ class MainActivity : FragmentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Initialize notification services
         notificationScheduler = DividendNotificationScheduler(this)
         permissionHelper = NotificationPermissionHelper(this)
-        
+
         // Setup notification permission handling
         setupNotificationPermissions()
-        
-        enableEdgeToEdge()
+
         setContent {
+
             MyDividendReminderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val database = AppDatabase.getDatabase(this)
-                    val productRepository = ProductRepository(database.productDao())
-                    val sectorRepository = SectorRepository(database.sectorDao())
-                    val dividendRepository = DividendRepository(database.dividendDao())
-                    val combinedRepository = CombinedRepository(productRepository, sectorRepository, dividendRepository)
-                    val productViewModel: ProductViewModel = viewModel(
-                        factory = ProductViewModel.Factory(combinedRepository)
-                    )
-                    
-                    val productsWithDividends by productViewModel.productsWithDividends.collectAsState()
-                    
-                    MainDashboardScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        productsWithDividends = productsWithDividends,
-                        onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) },
-                        onNavigateToProducts = {
-                            val intent = Intent(this@MainActivity, ProductListActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onNavigateToSectors = {
-                            val intent = Intent(this@MainActivity, SectorActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onNavigateToAddDividend = {
-                            val intent = Intent(this@MainActivity, AddDividendActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onExportDividends = {
-                            exportDividendsToCsv(productsWithDividends)
-                        },
-                        onNavigateToApiKeys = {
-                            val intent = Intent(this@MainActivity, ApiKeyActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onNavigateToPrompt = {
-                            val intent = Intent(this@MainActivity, PromptActivity::class.java)
-                            startActivity(intent)
-                        }
-                    )
-                }
+                val database = AppDatabase.getDatabase(this)
+                val productRepository = ProductRepository(database.productDao())
+                val sectorRepository = SectorRepository(database.sectorDao())
+                val dividendRepository = DividendRepository(database.dividendDao())
+                val combinedRepository =
+                    CombinedRepository(productRepository, sectorRepository, dividendRepository)
+                val productViewModel: ProductViewModel = viewModel(
+                    factory = ProductViewModel.Factory(combinedRepository)
+                )
+
+                val productsWithDividends by productViewModel.productsWithDividends.collectAsState()
+
+                // Initialize navigation helper
+                val navigationHelper = NavigationHelper(this@MainActivity)
+
+                MainDashboardScreen(
+                    navigationHelper = navigationHelper,
+                    productsWithDividends = productsWithDividends,
+                    onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) }
+                )
             }
+
         }
     }
 
@@ -96,11 +80,11 @@ class MainActivity : FragmentActivity() {
             // Schedule daily notification checks
             notificationScheduler.scheduleDailyNotificationCheck()
         }
-        
+
         permissionHelper.onPermissionDenied = {
             // Handle permission denied - could show a dialog explaining why notifications are needed
         }
-        
+
         // Check and request notification permission
         permissionHelper.checkAndRequestNotificationPermission()
     }
@@ -110,26 +94,6 @@ class MainActivity : FragmentActivity() {
         // Ensure notifications are scheduled when app resumes
         if (permissionHelper.hasNotificationPermission()) {
             notificationScheduler.scheduleDailyNotificationCheck()
-        }
-    }
-    
-    private fun exportDividendsToCsv(productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends>) {
-        try {
-            if (productsWithDividends.isEmpty()) {
-                Toast.makeText(this, getString(R.string.no_dividends_to_export), Toast.LENGTH_SHORT).show()
-                return
-            }
-            
-            val csvUri = CsvExportUtil.exportDividendsToCsv(this, productsWithDividends)
-            if (csvUri != null) {
-                val shareIntent = CsvExportUtil.createShareIntent(this, csvUri)
-                startActivity(Intent.createChooser(shareIntent, getString(R.string.export_dividends)))
-            } else {
-                Toast.makeText(this, getString(R.string.failed_to_create_csv), Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, getString(R.string.error_exporting_dividends, e.message), Toast.LENGTH_SHORT).show()
         }
     }
 }

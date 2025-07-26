@@ -14,28 +14,31 @@ import com.example.mydividendreminder.data.repository.SectorRepository
 import com.example.mydividendreminder.ui.screen.SectorListScreen
 import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
 import com.example.mydividendreminder.ui.viewmodel.SectorViewModel
+import com.example.mydividendreminder.util.NavigationHelper
+import android.content.Intent
 
 class SectorActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         enableEdgeToEdge()
         setContent {
             MyDividendReminderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val database = AppDatabase.getDatabase(this)
-                    val sectorRepository = SectorRepository(database.sectorDao())
-                    val sectorViewModel: SectorViewModel = viewModel(
-                        factory = SectorViewModel.Factory(sectorRepository)
-                    )
-                    
-                    SectorListScreen(
-                        viewModel = sectorViewModel,
-                        onBackPressed = { finish() },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+                val database = AppDatabase.getDatabase(this)
+                val sectorRepository = SectorRepository(database.sectorDao())
+                val sectorViewModel: SectorViewModel = viewModel(
+                    factory = SectorViewModel.Factory(sectorRepository)
+                )
+
+                // Initialize navigation helper
+                val navigationHelper = NavigationHelper(this@SectorActivity)
+
+                SectorListScreen(
+                    viewModel = sectorViewModel,
+                    navigationHelper = navigationHelper
+                )
             }
         }
     }

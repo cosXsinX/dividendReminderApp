@@ -11,8 +11,10 @@ import com.example.mydividendreminder.data.database.AppDatabase
 import com.example.mydividendreminder.data.repository.ApiKeyRepository
 import com.example.mydividendreminder.ui.screen.PromptScreen
 import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
+import com.example.mydividendreminder.util.NavigationHelper
 import com.example.mydividendreminder.ui.viewmodel.PromptViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.content.Intent
 
 class PromptActivity : FragmentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -26,9 +28,13 @@ class PromptActivity : FragmentActivity() {
                 val promptViewModel: PromptViewModel = viewModel(
                     factory = PromptViewModel.Factory(repository)
                 )
+                
+                // Initialize navigation helper
+                val navigationHelper = NavigationHelper(this@PromptActivity)
+                
                 PromptScreen(
                     viewModel = promptViewModel,
-                    onBackPressed = { finish() }
+                    navigationHelper = navigationHelper
                 )
             }
         }

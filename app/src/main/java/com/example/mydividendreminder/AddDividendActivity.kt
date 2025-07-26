@@ -22,6 +22,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
 import com.example.mydividendreminder.data.database.AppDatabase
 import com.example.mydividendreminder.data.repository.ProductRepository
 import com.example.mydividendreminder.data.repository.SectorRepository
@@ -33,60 +34,75 @@ import com.example.mydividendreminder.data.remote.repository.StockRepositoryImpl
 import com.example.mydividendreminder.domain.usecase.GetStockInfoUseCase
 import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import android.content.Intent
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
+import com.example.mydividendreminder.util.NavigationHelper
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 class AddDividendActivity : ComponentActivity() {
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         setContent {
             MyDividendReminderTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(stringResource(R.string.add_dividend)) },
-                            navigationIcon = {
-                                IconButton(onClick = { finish() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = stringResource(R.string.back)
-                                    )
-                                }
-                            }
-                        )
-                    }
-                ) { innerPadding ->
-                    val database = AppDatabase.getDatabase(this)
-                    val productRepository = ProductRepository(database.productDao())
-                    val sectorRepository = SectorRepository(database.sectorDao())
-                    val dividendRepository = DividendRepository(database.dividendDao())
-                    val combinedRepository = CombinedRepository(productRepository, sectorRepository, dividendRepository)
-                    
-                    // Setup Yahoo Finance API
-                    val yahooFinanceApi = YahooFinanceApiImpl()
-                    val stockRepository = StockRepositoryImpl(yahooFinanceApi)
-                    val getStockInfoUseCase = GetStockInfoUseCase(stockRepository)
-                    
-                    val productViewModel: ProductViewModel = viewModel(
-                        factory = ProductViewModel.Factory(combinedRepository, getStockInfoUseCase)
-                    )
-                    
-                    val productId = intent.getLongExtra("PRODUCT_ID", -1L)
-                    AddDividendScreen(
-                        viewModel = productViewModel,
-                        modifier = Modifier.padding(innerPadding),
-                        onDividendAdded = { finish() },
-                        preselectedProductId = if (productId != -1L) productId else null
-                    )
-                }
+                // Initialize navigation helper
+                val navigationHelper = NavigationHelper(this@AddDividendActivity)
+
+                AddDividendContent(
+                    navigationHelper = navigationHelper,
+                    onDividendAdded = { finish() },
+                    preselectedProductId = intent.getLongExtra("PRODUCT_ID", -1L)
+                        .let { if (it != -1L) it else null }
+                )
             }
         }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddDividendContent(
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
+    onDividendAdded: () -> Unit = {},
+    preselectedProductId: Long? = null
+) {
+    val database = AppDatabase.getDatabase(LocalContext.current as android.app.Activity)
+    val productRepository = ProductRepository(database.productDao())
+    val sectorRepository = SectorRepository(database.sectorDao())
+    val dividendRepository = DividendRepository(database.dividendDao())
+    val combinedRepository =
+        CombinedRepository(productRepository, sectorRepository, dividendRepository)
+
+    // Setup Yahoo Finance API
+    val yahooFinanceApi = YahooFinanceApiImpl()
+    val stockRepository = StockRepositoryImpl(yahooFinanceApi)
+    val getStockInfoUseCase = GetStockInfoUseCase(stockRepository)
+
+    val productViewModel: ProductViewModel = viewModel(
+        factory = ProductViewModel.Factory(combinedRepository, getStockInfoUseCase)
+    )
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DefaultMainAppBar(
+            navigationHelper = navigationHelper
+        )
+
+        AddDividendScreen(
+            viewModel = productViewModel,
+            modifier = Modifier.padding(16.dp),
+            onDividendAdded = onDividendAdded,
+            preselectedProductId = preselectedProductId
+        )
     }
 }
 
@@ -102,11 +118,11 @@ fun AddDividendScreen(
     val products by viewModel.products.collectAsState()
     val productsWithDividends by viewModel.productsWithDividends.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    
+
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
     var showProductSelection by remember { mutableStateOf(false) }
     var showAddDividendDialog by remember { mutableStateOf(false) }
-    
+
     // Pre-select product if product ID is provided
     LaunchedEffect(preselectedProductId, products) {
         if (preselectedProductId != null && selectedProduct == null) {
@@ -116,7 +132,7 @@ fun AddDividendScreen(
             }
         }
     }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -134,9 +150,9 @@ fun AddDividendScreen(
                     text = stringResource(R.string.select_product),
                     style = MaterialTheme.typography.titleMedium
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 if (selectedProduct != null) {
                     // Show selected product
                     Card(
@@ -167,36 +183,36 @@ fun AddDividendScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 Button(
                     onClick = { showProductSelection = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = if (selectedProduct != null) 
-                            stringResource(R.string.change_product) 
-                        else 
+                        text = if (selectedProduct != null)
+                            stringResource(R.string.change_product)
+                        else
                             stringResource(R.string.select_product)
                     )
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Upcoming Dividends Section
         UpcomingDividendsSection(
             productsWithDividends = productsWithDividends,
             onDeleteDividend = { dividend -> viewModel.deleteDividend(dividend) }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Add Dividend Button
         Button(
-            onClick = { 
+            onClick = {
                 if (selectedProduct != null) {
                     showAddDividendDialog = true
                 }
@@ -206,7 +222,7 @@ fun AddDividendScreen(
         ) {
             Text(stringResource(R.string.add_dividend))
         }
-        
+
         if (isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -216,7 +232,7 @@ fun AddDividendScreen(
             }
         }
     }
-    
+
     // Product Selection Dialog
     if (showProductSelection) {
         AlertDialog(
@@ -257,7 +273,7 @@ fun AddDividendScreen(
             }
         )
     }
-    
+
     // Add Dividend Dialog
     if (showAddDividendDialog && selectedProduct != null) {
         AddDividendDialog(
@@ -287,10 +303,10 @@ fun AddDividendDialog(
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var dividendAmount by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
+        title = {
             Text(
                 text = stringResource(R.string.add_dividend_for_product, product.ticker)
             )
@@ -303,7 +319,7 @@ fun AddDividendDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
-                
+
                 OutlinedButton(
                     onClick = { showDatePicker = true },
                     modifier = Modifier.fillMaxWidth()
@@ -312,9 +328,9 @@ fun AddDividendDialog(
                         text = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Amount Input
                 TextField(
                     value = dividendAmount,
@@ -346,22 +362,22 @@ fun AddDividendDialog(
             }
         }
     )
-    
+
     // Date Picker Dialog
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = selectedDate.toEpochDay() * 24 * 60 * 60 * 1000
         )
-        
+
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
-                    onClick = { 
+                    onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             selectedDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
                         }
-                        showDatePicker = false 
+                        showDatePicker = false
                     }
                 ) {
                     Text(stringResource(R.string.ok))
@@ -391,7 +407,7 @@ fun UpcomingDividendsSection(
     val upcomingProducts = productsWithDividends.filter { productWithDividends ->
         productWithDividends.dividends.any { it.dividendDate >= LocalDate.now() }
     }
-    
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -403,9 +419,9 @@ fun UpcomingDividendsSection(
                 text = stringResource(R.string.upcoming_dividends),
                 style = MaterialTheme.typography.titleMedium
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             if (upcomingProducts.isNotEmpty()) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -415,7 +431,7 @@ fun UpcomingDividendsSection(
                         val dividends = productWithDividends.dividends
                             .filter { it.dividendDate >= LocalDate.now() }
                             .sortedBy { it.dividendDate }
-                        
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -430,13 +446,14 @@ fun UpcomingDividendsSection(
                                     style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
-                                
+
                                 dividends.forEach { dividend ->
-                                    val daysUntilDividend = java.time.temporal.ChronoUnit.DAYS.between(
-                                        LocalDate.now(), 
-                                        dividend.dividendDate
-                                    )
-                                    
+                                    val daysUntilDividend =
+                                        java.time.temporal.ChronoUnit.DAYS.between(
+                                            LocalDate.now(),
+                                            dividend.dividendDate
+                                        )
+
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -444,40 +461,52 @@ fun UpcomingDividendsSection(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "Date: ${dividend.dividendDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}",
+                                                text = "Date: ${
+                                                    dividend.dividendDate.format(
+                                                        DateTimeFormatter.ISO_LOCAL_DATE
+                                                    )
+                                                }",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                             Text(
-                                                text = "Amount: €${String.format("%.2f", dividend.dividendAmount)}",
+                                                text = "Amount: €${
+                                                    String.format(
+                                                        "%.2f",
+                                                        dividend.dividendAmount
+                                                    )
+                                                }",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                             Text(
-                                                text = if (daysUntilDividend == 0L) 
-                                                    stringResource(R.string.today_exclamation) 
-                                                else 
-                                                    stringResource(R.string.days_until_dividend, daysUntilDividend),
+                                                text = if (daysUntilDividend == 0L)
+                                                    stringResource(R.string.today_exclamation)
+                                                else
+                                                    stringResource(
+                                                        R.string.days_until_dividend,
+                                                        daysUntilDividend
+                                                    ),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = if (daysUntilDividend <= 7) 
-                                                    MaterialTheme.colorScheme.primary 
-                                                else 
+                                                color = if (daysUntilDividend <= 7)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
                                                     MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                         }
-                                        
+
                                         IconButton(
                                             onClick = { onDeleteDividend(dividend) },
                                             modifier = Modifier.size(24.dp)
                                         ) {
                                             Text(
-                                                "×", 
+                                                "×",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                                             )
                                         }
                                     }
-                                    
+
                                     if (dividend != dividends.last()) {
                                         Spacer(modifier = Modifier.height(4.dp))
                                     }

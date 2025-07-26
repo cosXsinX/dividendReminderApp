@@ -15,19 +15,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import com.example.mydividendreminder.R
 import com.example.mydividendreminder.data.entity.Product
-import com.example.mydividendreminder.data.entity.ProductWithDividends
-import com.example.mydividendreminder.data.entity.Dividend
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductListScreen(
     viewModel: ProductViewModel,
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
+    productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList(),
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit = {},
-    onNavigateToAddDividend: (Long) -> Unit = {}
+    onNavigateToAddDividendForProduct: (Long) -> Unit = {}
 ) {
     val products by viewModel.products.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -40,31 +39,10 @@ fun ProductListScreen(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.all_products),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Text(
-                    text = stringResource(R.string.all_products_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Button(
-                onClick = onBackPressed
-            ) {
-                Text(stringResource(R.string.back))
-            }
-        }
+        DefaultMainAppBar(
+            navigationHelper = navigationHelper,
+            productsWithDividends = productsWithDividends
+        )
         
         // Add Product Button at the top
         AddProductButton(
@@ -115,40 +93,36 @@ fun ProductListScreen(
                     items(products) { product ->
                         ProductCard(
                             product = product,
-                            onDeleteProduct = { viewModel.deleteProduct(product) },
-                            onNavigateToAddDividend = { onNavigateToAddDividend(product.id) },
-                            onEditProduct = { product ->
-                                productToEdit = product
+                            onEditProduct = { 
+                                productToEdit = it
                                 showEditDialog = true
-                            }
+                            },
+                            onDeleteProduct = { viewModel.deleteProduct(product) },
+                            onNavigateToAddDividend = { onNavigateToAddDividendForProduct(product.id) }
                         )
                     }
                 }
             }
         }
-
-        // Edit Product Dialog
-        if (showEditDialog && productToEdit != null) {
-            EditProductDialog(
-                product = productToEdit!!,
-                sectors = sectors,
-                onDismiss = {
-                    showEditDialog = false
-                    productToEdit = null
-                },
-                onConfirm = { ticker, name, isin, selectedSectorIds ->
-                    val updatedProduct = productToEdit!!.copy(
-                        ticker = ticker,
-                        name = name,
-                        isin = isin
-                    )
-                    viewModel.updateProduct(updatedProduct, selectedSectorIds)
-                    showEditDialog = false
-                    productToEdit = null
-                },
-                viewModel = viewModel
-            )
-        }
+    }
+    
+    // Edit Dialog
+    if (showEditDialog && productToEdit != null) {
+        EditProductDialog(
+            product = productToEdit!!,
+            sectors = sectors,
+            onDismiss = { 
+                showEditDialog = false 
+                productToEdit = null
+            },
+            onConfirm = { ticker, name, isin, selectedSectorIds ->
+                viewModel.updateProduct(productToEdit!!.copy(ticker = ticker, name = name, isin = isin))
+                // Update sectors if needed
+                showEditDialog = false
+                productToEdit = null
+            },
+            viewModel = viewModel
+        )
     }
 }
 

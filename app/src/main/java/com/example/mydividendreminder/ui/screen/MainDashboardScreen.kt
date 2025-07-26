@@ -12,18 +12,23 @@ import androidx.compose.ui.unit.dp
 import com.example.mydividendreminder.R
 import com.example.mydividendreminder.data.entity.ProductWithDividends
 import com.example.mydividendreminder.data.entity.Dividend
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Help
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainDashboardScreen(
-    onNavigateToProducts: () -> Unit = {},
-    onNavigateToSectors: () -> Unit = {},
-    onNavigateToAddDividend: () -> Unit = {},
-    onExportDividends: () -> Unit = {},
-    onNavigateToApiKeys: () -> Unit = {},
-    onNavigateToPrompt: () -> Unit = {},
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
     productsWithDividends: List<ProductWithDividends> = emptyList(),
     onDeleteDividend: (Dividend) -> Unit = {},
     modifier: Modifier = Modifier
@@ -32,10 +37,9 @@ fun MainDashboardScreen(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(32.dp)
+        DefaultMainAppBar(
+            navigationHelper = navigationHelper,
+            productsWithDividends = productsWithDividends
         )
         
         // Upcoming Dividends Section
@@ -47,7 +51,7 @@ fun MainDashboardScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Navigation Card
+        // Instead, show a welcome message only
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,61 +67,12 @@ fun MainDashboardScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
                 Text(
                     text = "Manage your dividend investments and get notified about upcoming payments",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
-                
-                Button(
-                    onClick = onNavigateToProducts,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                ) {
-                    Text(stringResource(R.string.view_products))
-                }
-                
-                Button(
-                    onClick = onNavigateToSectors,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                ) {
-                    Text(stringResource(R.string.sectors))
-                }
-                
-                Button(
-                    onClick = onNavigateToAddDividend,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                ) {
-                    Text(stringResource(R.string.add_dividend))
-                }
-                
-                Button(
-                    onClick = onExportDividends,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.export_dividends))
-                }
-
-                Button(
-                    onClick = onNavigateToApiKeys,
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-                ) {
-                    Text("API Keys")
-                }
-
-                Button(
-                    onClick = onNavigateToPrompt,
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-                ) {
-                    Text("Prompt Playground")
-                }
             }
         }
     }

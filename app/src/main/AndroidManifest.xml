@@ -47,6 +47,7 @@
             android:theme="@style/Theme.MyDividendReminder" />
         <activity android:name=".ApiKeyActivity" />
         <activity android:name=".PromptActivity" />
+        <activity android:name=".HelpActivity" />
         
         <!-- File Provider for CSV export -->
         <provider

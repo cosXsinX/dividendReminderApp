@@ -13,12 +13,13 @@ import androidx.compose.ui.unit.dp
 import com.example.mydividendreminder.R
 import com.example.mydividendreminder.data.entity.Sector
 import com.example.mydividendreminder.ui.viewmodel.SectorViewModel
+import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SectorListScreen(
     viewModel: SectorViewModel,
-    onBackPressed: () -> Unit = {},
+    navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
     modifier: Modifier = Modifier
 ) {
     val sectors by viewModel.sectors.collectAsState()
@@ -28,25 +29,9 @@ fun SectorListScreen(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.sectors),
-                style = MaterialTheme.typography.headlineMedium
-            )
-            
-            Button(
-                onClick = onBackPressed,
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Text(stringResource(R.string.back))
-            }
-        }
+        DefaultMainAppBar(
+            navigationHelper = navigationHelper
+        )
         
         Spacer(modifier = Modifier.height(8.dp))
         
