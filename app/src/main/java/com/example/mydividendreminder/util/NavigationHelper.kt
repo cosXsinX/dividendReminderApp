@@ -8,48 +8,77 @@ import com.example.mydividendreminder.*
 /**
  * Utility class to centralize navigation functions across the app.
  * This eliminates the need to recreate the same navigation lambda functions in each activity.
+ * Now includes custom transitions that exclude the AppBar from being part of the transition.
  */
 class NavigationHelper(private val context: Context) {
 
     fun navigateToMain() : () -> Unit = {
         val intent = Intent(context, MainActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
 
     fun navigateToHelp(): () -> Unit = {
         val intent = Intent(context, HelpActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
     fun navigateToProducts(): () -> Unit = {
         val intent = Intent(context, ProductListActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
     fun navigateToSectors(): () -> Unit = {
         val intent = Intent(context, SectorActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
     fun navigateToAddDividend(): () -> Unit = {
         val intent = Intent(context, AddDividendActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
     fun navigateToApiKeys(): () -> Unit = {
         val intent = Intent(context, ApiKeyActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
     fun navigateToPrompt(): () -> Unit = {
         val intent = Intent(context, PromptActivity::class.java)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
@@ -60,7 +89,11 @@ class NavigationHelper(private val context: Context) {
     fun navigateToAddDividendForProduct(): (Long) -> Unit = { productId ->
         val intent = Intent(context, AddDividendActivity::class.java)
         intent.putExtra("PRODUCT_ID", productId)
-        context.startActivity(intent)
+        if (context is Activity) {
+            TransitionHelper.startActivityWithOverrideTransition(context, intent)
+        } else {
+            context.startActivity(intent)
+        }
         finishCurrentActivity()
     }
     
@@ -70,7 +103,7 @@ class NavigationHelper(private val context: Context) {
      */
     fun finishCurrentActivity(): () -> Unit = {
         if (context is Activity) {
-            context.finish()
+            TransitionHelper.finishWithNoTransition(context)
         }
     }
     

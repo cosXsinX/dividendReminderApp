@@ -64,43 +64,18 @@ fun ProductListScreen(
                 modifier = Modifier.padding(16.dp)
             )
         } else {
-            if (products.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_products),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(products) { product ->
+                    ProductCard(
+                        product = product,
+                        onEditProduct = { productToEdit = it },
+                        onDeleteProduct = { viewModel.deleteProduct(product) },
+                        onNavigateToAddDividend = { onNavigateToAddDividendForProduct(product.id) }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.add_products_to_get_started),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(products) { product ->
-                        ProductCard(
-                            product = product,
-                            onEditProduct = { 
-                                productToEdit = it
-                                showEditDialog = true
-                            },
-                            onDeleteProduct = { viewModel.deleteProduct(product) },
-                            onNavigateToAddDividend = { onNavigateToAddDividendForProduct(product.id) }
-                        )
-                    }
                 }
             }
         }
