@@ -9,10 +9,13 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import android.content.Intent
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import com.example.mydividendreminder.service.DividendNotificationScheduler
 import com.example.mydividendreminder.ui.screen.MainDashboardScreen
 import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
@@ -27,8 +30,6 @@ import com.example.mydividendreminder.util.CsvExportUtil
 import com.example.mydividendreminder.util.DividendExportHelper
 import com.example.mydividendreminder.util.NavigationHelper
 import android.widget.Toast
-import com.example.mydividendreminder.ApiKeyActivity
-import com.example.mydividendreminder.PromptActivity
 import com.example.mydividendreminder.HelpActivity
 import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 
@@ -61,15 +62,47 @@ class MainActivity : FragmentActivity() {
                 )
 
                 val productsWithDividends by productViewModel.productsWithDividends.collectAsState()
+                val isSyncing by productViewModel.isSyncing.collectAsState()
+                val syncError by productViewModel.syncError.collectAsState()
+                val syncSuccess by productViewModel.syncSuccess.collectAsState()
+                
+                val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
+
+                // Show sync status messages
+                LaunchedEffect(syncError) {
+                    syncError?.let { error ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(error)
+                            productViewModel.clearSyncMessages()
+                        }
+                    }
+                }
+
+                LaunchedEffect(syncSuccess) {
+                    syncSuccess?.let { success ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(success)
+                            productViewModel.clearSyncMessages()
+                        }
+                    }
+                }
 
                 // Initialize navigation helper
                 val navigationHelper = NavigationHelper(this@MainActivity)
 
-                MainDashboardScreen(
-                    navigationHelper = navigationHelper,
-                    productsWithDividends = productsWithDividends,
-                    onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) }
-                )
+                Scaffold(
+                    snackbarHost = { SnackbarHost(snackbarHostState) }
+                ) { paddingValues ->
+                    MainDashboardScreen(
+                        navigationHelper = navigationHelper,
+                        productsWithDividends = productsWithDividends,
+                        onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) },
+                        onSyncClick = { productViewModel.syncDividendsFromUrl() },
+                        isSyncing = isSyncing,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
 
         }

@@ -11,6 +11,9 @@ import com.example.mydividendreminder.data.entity.Dividend
 import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.domain.model.Stock
 import com.example.mydividendreminder.domain.usecase.GetStockInfoUseCase
+import com.example.mydividendreminder.service.DividendSyncService
+import com.example.mydividendreminder.service.DividendSyncServiceImpl
+import com.example.mydividendreminder.service.DividendData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +24,8 @@ class ProductViewModel(
     private val repository: CombinedRepository,
     private val getStockInfo: GetStockInfoUseCase? = null
 ) : ViewModel() {
+    
+    private val syncService: DividendSyncService = DividendSyncServiceImpl()
     
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products: StateFlow<List<Product>> = _products.asStateFlow()
@@ -45,6 +50,15 @@ class ProductViewModel(
     
     private val _stockError = MutableStateFlow<String?>(null)
     val stockError: StateFlow<String?> = _stockError.asStateFlow()
+    
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
+    
+    private val _syncError = MutableStateFlow<String?>(null)
+    val syncError: StateFlow<String?> = _syncError.asStateFlow()
+    
+    private val _syncSuccess = MutableStateFlow<String?>(null)
+    val syncSuccess: StateFlow<String?> = _syncSuccess.asStateFlow()
     
     init {
         loadProducts()
@@ -181,6 +195,88 @@ class ProductViewModel(
                 _dividends.value = dividendList
             }
         }
+    }
+    
+    fun syncDividendsFromUrl(url: String = "https://www.maximilienzakowski.org/2026/01/02/dividends-2026-2/") {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            _syncError.value = null
+            _syncSuccess.value = null
+            
+            try {
+                // Fetch dividend data from URL
+                val dividendDataList = syncService.fetchDividendsFromUrl(url)
+                
+                if (dividendDataList.isEmpty()) {
+                    _syncError.value = "No dividend data found on the page"
+                    _isSyncing.value = false
+                    return@launch
+                }
+                
+                var productsCreated = 0
+                var dividendsAdded = 0
+                var dividendsSkipped = 0
+                
+                // Process each dividend
+                for (dividendData in dividendDataList) {
+                    try {
+                        // Find or create product by ticker
+                        var product = repository.getProductByTicker(dividendData.ticker)
+                        
+                        if (product == null) {
+                            // Create new product
+                            product = Product(
+                                ticker = dividendData.ticker,
+                                name = dividendData.company.ifBlank { dividendData.ticker },
+                                isin = dividendData.isin.ifBlank { "" }
+                            )
+                            val productId = repository.insertProduct(product)
+                            product = product.copy(id = productId)
+                            productsCreated++
+                        }
+                        
+                        // Check if dividend already exists (same product, date, and amount)
+                        val dividendExists = repository.dividendExists(
+                            productId = product.id,
+                            dividendDate = dividendData.paymentDate,
+                            dividendAmount = dividendData.amount
+                        )
+
+                        if (!dividendExists) {
+                            // Add dividend using payment date (as that's when the user receives it)
+                            val dividend = Dividend(
+                                productId = product.id,
+                                dividendDate = dividendData.paymentDate,
+                                dividendAmount = dividendData.amount
+                            )
+                            repository.insertDividend(dividend)
+                            dividendsAdded++
+                        } else {
+                            dividendsSkipped++
+                        }
+                    } catch (e: Exception) {
+                        // Continue with next dividend if one fails
+                        continue
+                    }
+                }
+                
+                // Refresh data
+                loadProducts()
+                loadDividends()
+                loadProductsWithDividends()
+                
+                _syncSuccess.value = "Sync completed: $productsCreated products created, $dividendsAdded dividends added, $dividendsSkipped skipped"
+            } catch (e: Exception) {
+                _syncError.value = "Sync failed: ${e.message}"
+            } finally {
+                _isSyncing.value = false
+            }
+        }
+    }
+    
+    fun clearSyncMessages() {
+        _syncError.value = null
+        _syncSuccess.value = null
     }
     
     class Factory(

@@ -58,6 +58,9 @@ class CombinedRepository(
     
     suspend fun getDividendById(id: Long): Dividend? = dividendRepository.getDividendById(id)
     
+    suspend fun dividendExists(productId: Long, dividendDate: LocalDate, dividendAmount: Double): Boolean =
+        dividendRepository.dividendExists(productId, dividendDate, dividendAmount)
+    
     suspend fun insertDividend(dividend: Dividend): Long = dividendRepository.insertDividend(dividend)
     
     suspend fun insertDividends(dividends: List<Dividend>) = dividendRepository.insertDividends(dividends)

@@ -69,14 +69,10 @@ object Migrations {
         }
     }
 
-    val MIGRATION_3_4 = object : Migration(3, 4) {
+    val MIGRATION_4_5 = object : Migration(4, 5) {
         override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("""
-                CREATE TABLE IF NOT EXISTS api_keys (
-                    provider TEXT NOT NULL PRIMARY KEY,
-                    key TEXT NOT NULL
-                )
-            """)
+            // Drop the api_keys table that was added in version 4
+            database.execSQL("DROP TABLE IF EXISTS api_keys")
         }
     }
 } 

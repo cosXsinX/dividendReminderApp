@@ -31,6 +31,8 @@ fun MainDashboardScreen(
     navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
     productsWithDividends: List<ProductWithDividends> = emptyList(),
     onDeleteDividend: (Dividend) -> Unit = {},
+    onSyncClick: (() -> Unit)? = null,
+    isSyncing: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -39,7 +41,9 @@ fun MainDashboardScreen(
     ) {
         DefaultMainAppBar(
             navigationHelper = navigationHelper,
-            productsWithDividends = productsWithDividends
+            productsWithDividends = productsWithDividends,
+            onSyncClick = onSyncClick,
+            isSyncing = isSyncing
         )
         
         // Upcoming Dividends Section

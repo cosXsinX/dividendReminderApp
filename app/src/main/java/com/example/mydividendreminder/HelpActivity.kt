@@ -59,10 +59,6 @@ fun HelpScreen(
             Text("Data Management", style = MaterialTheme.typography.titleLarge)
             HelpItem(icon = Icons.Filled.Add, label = "Add Dividend", description = "Quickly add a new dividend entry for any of your products.")
             HelpItem(icon = Icons.Filled.FileDownload, label = "Export", description = "Export your dividend data to a CSV file for backup or analysis.")
-            HelpItem(icon = Icons.Filled.VpnKey, label = "API Keys", description = "Manage your API keys for connecting to external data sources.")
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("AI Tools", style = MaterialTheme.typography.titleLarge)
-            HelpItem(icon = Icons.Filled.PlayArrow, label = "Prompt Playground", description = "Access AI-powered features and experiment with prompts in the playground.")
         }
     }
 }

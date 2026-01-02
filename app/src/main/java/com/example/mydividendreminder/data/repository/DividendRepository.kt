@@ -23,6 +23,9 @@ class DividendRepository(private val dividendDao: DividendDao) {
     
     suspend fun getDividendById(id: Long): Dividend? = dividendDao.getDividendById(id)
     
+    suspend fun dividendExists(productId: Long, dividendDate: LocalDate, dividendAmount: Double): Boolean =
+        dividendDao.dividendExists(productId, dividendDate.toString(), dividendAmount)
+    
     suspend fun insertDividend(dividend: Dividend): Long = dividendDao.insertDividend(dividend)
     
     suspend fun insertDividends(dividends: List<Dividend>) = dividendDao.insertDividends(dividends)

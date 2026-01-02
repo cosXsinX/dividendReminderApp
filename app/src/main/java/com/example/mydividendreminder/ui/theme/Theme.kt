@@ -14,6 +14,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.RowScope
@@ -24,10 +25,9 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Modifier
@@ -104,7 +104,9 @@ fun ThemedTopAppBar(
 @Composable
 fun DefaultMainAppBar(
     navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
-    productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList()
+    productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList(),
+    onSyncClick: (() -> Unit)? = null,
+    isSyncing: Boolean = false
 ) {
     ThemedTopAppBar(
         title = {}, // No title for main dashboard
@@ -116,6 +118,21 @@ fun DefaultMainAppBar(
             )
         },
         actions = {
+            onSyncClick?.let { syncFunction ->
+                IconButton(
+                    onClick = syncFunction,
+                    enabled = !isSyncing
+                ) {
+                    if (isSyncing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Filled.Sync, contentDescription = "Sync Dividends")
+                    }
+                }
+            }
             IconButton(onClick = navigationHelper.navigateToMain()) {
                 Icon(Icons.Default.House, contentDescription = "Main")
             }
@@ -133,12 +150,6 @@ fun DefaultMainAppBar(
             }
             IconButton(onClick = navigationHelper.createExportDividendsFunction(productsWithDividends)) {
                 Icon(Icons.Filled.FileDownload, contentDescription = stringResource(R.string.export_dividends))
-            }
-            IconButton(onClick = navigationHelper.navigateToApiKeys()) {
-                Icon(Icons.Filled.VpnKey, contentDescription = "API Keys")
-            }
-            IconButton(onClick = navigationHelper.navigateToPrompt()) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = "Prompt Playground")
             }
         }
     )

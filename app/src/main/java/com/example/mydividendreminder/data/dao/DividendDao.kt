@@ -24,6 +24,9 @@ interface DividendDao {
     @Query("SELECT * FROM dividends WHERE dividendDate BETWEEN :startDate AND :endDate ORDER BY dividendDate ASC")
     suspend fun getUpcomingDividends(startDate: String, endDate: String): List<Dividend>
 
+    @Query("SELECT COUNT(*) > 0 FROM dividends WHERE productId = :productId AND dividendDate = :dividendDate AND ABS(dividendAmount - :dividendAmount) < 0.01")
+    suspend fun dividendExists(productId: Long, dividendDate: String, dividendAmount: Double): Boolean
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDividend(dividend: Dividend): Long
 

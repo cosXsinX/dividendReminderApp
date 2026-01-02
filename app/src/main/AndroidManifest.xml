@@ -34,26 +34,18 @@
             android:name=".SectorActivity"
             android:exported="false"
             android:label="Sectors"
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
+            android:theme="@style/Theme.MyDividendReminder" />
         <activity
             android:name=".AddDividendActivity"
             android:exported="false"
             android:label="@string/add_dividend"
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
+            android:theme="@style/Theme.MyDividendReminder" />
         <activity
             android:name=".ProductListActivity"
             android:exported="false"
             android:label="Products"
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
-        <activity 
-            android:name=".ApiKeyActivity" 
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
-        <activity 
-            android:name=".PromptActivity" 
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
-        <activity 
-            android:name=".HelpActivity" 
-            android:theme="@style/Theme.MyDividendReminder.SlideTransition" />
+            android:theme="@style/Theme.MyDividendReminder" />
+        <activity android:name=".HelpActivity" />
         
         <!-- File Provider for CSV export -->
         <provider
