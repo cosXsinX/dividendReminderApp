@@ -2,34 +2,30 @@ package com.example.mydividendreminder
 
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import android.content.Intent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
+import com.example.mydividendreminder.data.database.AppDatabase
+import com.example.mydividendreminder.data.repository.CombinedRepository
+import com.example.mydividendreminder.data.repository.DividendRepository
+import com.example.mydividendreminder.data.repository.ProductRepository
+import com.example.mydividendreminder.data.repository.SectorRepository
 import com.example.mydividendreminder.service.DividendNotificationScheduler
 import com.example.mydividendreminder.ui.screen.MainDashboardScreen
 import com.example.mydividendreminder.ui.theme.MyDividendReminderTheme
-import com.example.mydividendreminder.util.NotificationPermissionHelper
-import com.example.mydividendreminder.data.database.AppDatabase
-import com.example.mydividendreminder.data.repository.ProductRepository
-import com.example.mydividendreminder.data.repository.SectorRepository
-import com.example.mydividendreminder.data.repository.DividendRepository
-import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
 import com.example.mydividendreminder.util.NavigationHelper
-import android.widget.Toast
-import com.example.mydividendreminder.HelpActivity
-import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
+import com.example.mydividendreminder.util.NotificationPermissionHelper
+import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
     private lateinit var notificationScheduler: DividendNotificationScheduler
@@ -98,7 +94,6 @@ class MainActivity : FragmentActivity() {
                         onDeleteDividend = { dividend -> productViewModel.deleteDividend(dividend) },
                         onSyncClick = { productViewModel.syncDividendsFromUrl() },
                         isSyncing = isSyncing,
-                        modifier = Modifier.padding(paddingValues)
                     )
                 }
             }

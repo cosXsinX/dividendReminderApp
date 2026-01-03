@@ -44,38 +44,41 @@ fun MainDashboardScreen(
             onSyncClick = onSyncClick,
             isSyncing = isSyncing
         )
+
         
-        // Upcoming Dividends Section
-        UpcomingDividendsSection(
-            productsWithDividends = productsWithDividends,
-            onDeleteDividend = onDeleteDividend,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Instead, show a welcome message only
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        LazyColumn(
+            modifier = Modifier.weight(1f),
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Welcome to Dividend Reminder",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 16.dp)
+            // Upcoming Dividends Section
+            item {
+                UpcomingDividendsSection(
+                    productsWithDividends = productsWithDividends,
+                    onDeleteDividend = onDeleteDividend
                 )
-                Text(
-                    text = "Manage your dividend investments and get notified about upcoming payments",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+            }
+            
+            // Welcome message card
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Welcome to Dividend Reminder",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Text(
+                            text = "Manage your dividend investments and get notified about upcoming payments",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
@@ -110,10 +113,10 @@ fun UpcomingDividendsSection(
             Spacer(modifier = Modifier.height(8.dp))
             
             if (upcomingProducts.isNotEmpty()) {
-                LazyColumn(
+                Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(upcomingProducts) { productWithDividends ->
+                    upcomingProducts.forEach { productWithDividends ->
                         val product = productWithDividends.product
                         val dividends = productWithDividends.dividends
                             .filter { it.dividendDate >= LocalDate.now() }
