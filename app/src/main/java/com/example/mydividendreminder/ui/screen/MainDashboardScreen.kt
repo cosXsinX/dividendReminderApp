@@ -49,14 +49,7 @@ fun MainDashboardScreen(
         LazyColumn(
             modifier = Modifier.weight(1f),
         ) {
-            // Upcoming Dividends Section
-            item {
-                UpcomingDividendsSection(
-                    productsWithDividends = productsWithDividends,
-                    onDeleteDividend = onDeleteDividend
-                )
-            }
-            
+
             // Welcome message card
             item {
                 Card(
@@ -80,6 +73,16 @@ fun MainDashboardScreen(
                     }
                 }
             }
+
+            // Upcoming Dividends Section
+            item {
+                UpcomingDividendsSection(
+                    productsWithDividends = productsWithDividends,
+                    onDeleteDividend = onDeleteDividend
+                )
+            }
+            
+
         }
     }
 }

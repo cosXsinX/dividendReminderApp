@@ -22,10 +22,10 @@ import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductListScreen(
-    modifier: Modifier = Modifier,
     viewModel: ProductViewModel,
     navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
     productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList(),
+    modifier: Modifier = Modifier,
     onNavigateToAddDividendForProduct: (Long) -> Unit = {}
 ) {
     val products by viewModel.products.collectAsState()
@@ -43,8 +43,6 @@ fun ProductListScreen(
             navigationHelper = navigationHelper,
             productsWithDividends = productsWithDividends
         )
-        
-
         
         // Notification Settings Section
         NotificationSettingsSection()
@@ -64,22 +62,24 @@ fun ProductListScreen(
                 items(products) { product ->
                     ProductCard(
                         product = product,
-                        onEditProduct = { productToEdit = it },
+                        onEditProduct = { 
+                            productToEdit = it
+                            showEditDialog = true
+                        },
                         onDeleteProduct = { viewModel.deleteProduct(product) },
                         onNavigateToAddDividend = { onNavigateToAddDividendForProduct(product.id) }
                     )
                 }
             }
         }
-
-        // Add Product Button at the top
+        
+        // Add Product Button at the bottom
         AddProductButton(
             sectors = sectors,
             onAddProduct = { ticker, name, isin, selectedSectorIds ->
                 viewModel.addProduct(ticker, name, isin, selectedSectorIds)
             },
-            viewModel = viewModel,
-            modifier = Modifier.padding(top = 0.dp, bottom = 60.dp)
+            viewModel = viewModel
         )
     }
     
@@ -89,11 +89,13 @@ fun ProductListScreen(
             product = productToEdit!!,
             sectors = sectors,
             onDismiss = { 
+                viewModel.clearStockInfo()
                 showEditDialog = false 
                 productToEdit = null
             },
             onConfirm = { ticker, name, isin, selectedSectorIds ->
                 viewModel.updateProduct(productToEdit!!.copy(ticker = ticker, name = name, isin = isin))
+                viewModel.clearStockInfo()
                 // Update sectors if needed
                 showEditDialog = false
                 productToEdit = null
@@ -135,7 +137,10 @@ fun ProductCard(
                     )
                 }
                 
-                Column {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(onClick = { onEditProduct(product) }) {
                         Text("✏️", style = MaterialTheme.typography.bodyLarge)
                     }
@@ -163,7 +168,7 @@ fun AddProductButton(
     
     Button(
         onClick = { showDialog = true },
-        modifier = modifier
+        modifier = modifier.padding(top = 0.dp, bottom = 60.dp)
     ) {
         Text(stringResource(R.string.add_product))
     }
@@ -431,6 +436,7 @@ fun NotificationSettingsSection(
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProductDialog(
     product: Product,
@@ -444,6 +450,30 @@ fun EditProductDialog(
     var isin by remember { mutableStateOf(product.isin) }
     var selectedSectorIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     
+    val stockInfo by viewModel.stockInfo.collectAsState()
+    val isLoadingStock by viewModel.isLoadingStock.collectAsState()
+    val stockError by viewModel.stockError.collectAsState()
+    
+    // Auto-fill name and ISIN when stock info is fetched
+    LaunchedEffect(stockInfo) {
+        stockInfo?.let { stock ->
+            name = stock.name
+            isin = stock.isin ?: ""
+        }
+    }
+    
+    // Debounce ticker input to avoid too many API calls
+    LaunchedEffect(ticker) {
+        if (ticker.isNotEmpty() && ticker.length >= 2 && ticker != product.ticker) {
+            kotlinx.coroutines.delay(500) // 500ms debounce
+            if (ticker.length >= 2 && ticker != product.ticker) { // Check again after delay
+                viewModel.fetchStockInfo(ticker.uppercase())
+            }
+        } else if (ticker.isEmpty() || ticker == product.ticker) {
+            viewModel.clearStockInfo()
+        }
+    }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.edit_product)) },
@@ -455,15 +485,89 @@ fun EditProductDialog(
                         ticker = newTicker
                     },
                     label = { Text(stringResource(R.string.ticker)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = stockError != null
                 )
+                
+                // Show loading indicator for stock info
+                if (isLoadingStock) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Fetching stock information...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                // Show error message
+                stockError?.let { error ->
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                
+                // Show stock info preview
+                stockInfo?.let { stock ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Text(
+                                text = "Stock Information",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "Name: ${stock.name}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            if (stock.isin != null) {
+                                Text(
+                                    text = "ISIN: ${stock.isin}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                            Text(
+                                text = "Price: $${stock.price}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = name,
                     onValueChange = { newName ->
                         name = newName
                     },
                     label = { Text(stringResource(R.string.name)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoadingStock
                 )
                 TextField(
                     value = isin,
@@ -471,7 +575,8 @@ fun EditProductDialog(
                         isin = newIsin
                     },
                     label = { Text(stringResource(R.string.isin)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoadingStock
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -518,7 +623,7 @@ fun EditProductDialog(
                 onClick = {
                     onConfirm(ticker, name, isin, selectedSectorIds.toList())
                 },
-                enabled = ticker.isNotEmpty() && name.isNotEmpty() && isin.isNotEmpty()
+                enabled = ticker.isNotEmpty() && name.isNotEmpty() && !isLoadingStock
             ) {
                 Text(stringResource(R.string.save))
             }
