@@ -132,7 +132,7 @@ fun AddSectorButton(
     
     Button(
         onClick = { showDialog = true },
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding( top = 0.dp, bottom = 60.dp)
     ) {
         Text(stringResource(R.string.add_sector))
     }

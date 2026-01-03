@@ -22,10 +22,10 @@ import com.example.mydividendreminder.ui.theme.DefaultMainAppBar
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProductListScreen(
+    modifier: Modifier = Modifier,
     viewModel: ProductViewModel,
     navigationHelper: com.example.mydividendreminder.util.NavigationHelper,
     productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends> = emptyList(),
-    modifier: Modifier = Modifier,
     onNavigateToAddDividendForProduct: (Long) -> Unit = {}
 ) {
     val products by viewModel.products.collectAsState()
@@ -44,15 +44,7 @@ fun ProductListScreen(
             productsWithDividends = productsWithDividends
         )
         
-        // Add Product Button at the top
-        AddProductButton(
-            sectors = sectors,
-            onAddProduct = { ticker, name, isin, selectedSectorIds ->
-                viewModel.addProduct(ticker, name, isin, selectedSectorIds)
-            },
-            viewModel = viewModel,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+
         
         // Notification Settings Section
         NotificationSettingsSection()
@@ -79,6 +71,16 @@ fun ProductListScreen(
                 }
             }
         }
+
+        // Add Product Button at the top
+        AddProductButton(
+            sectors = sectors,
+            onAddProduct = { ticker, name, isin, selectedSectorIds ->
+                viewModel.addProduct(ticker, name, isin, selectedSectorIds)
+            },
+            viewModel = viewModel,
+            modifier = Modifier.padding(top = 0.dp, bottom = 60.dp)
+        )
     }
     
     // Edit Dialog
