@@ -136,8 +136,7 @@ Potential improvements for future versions:
 1. **Search Functionality**: Add search bar to product selection dialog
 2. **Bulk Operations**: Allow adding multiple dividends at once
 3. **Recurring Dividends**: Support for setting up recurring dividend schedules
-4. **Import/Export**: CSV import/export functionality
-5. **Advanced Validation**: More sophisticated validation rules
+4. **Advanced Validation**: More sophisticated validation rules
 
 ## Material 3 Migration Guide
 

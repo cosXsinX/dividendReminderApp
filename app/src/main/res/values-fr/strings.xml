@@ -65,11 +65,4 @@
     
     <!-- Main Dashboard -->
     <string name="view_products">Voir les produits</string>
-    
-    <!-- CSV Export -->
-    <string name="export_dividends">Exporter les dividendes</string>
-    <string name="export_dividends_description">Exporter toutes les dividendes vers un fichier CSV</string>
-    <string name="no_dividends_to_export">Aucune dividende à exporter</string>
-    <string name="failed_to_create_csv">Échec de la création du fichier CSV</string>
-    <string name="error_exporting_dividends">Erreur lors de l\'exportation des dividendes : %s</string>
 </resources> 

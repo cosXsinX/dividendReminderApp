@@ -26,8 +26,6 @@ import com.example.mydividendreminder.data.repository.SectorRepository
 import com.example.mydividendreminder.data.repository.DividendRepository
 import com.example.mydividendreminder.data.repository.CombinedRepository
 import com.example.mydividendreminder.ui.viewmodel.ProductViewModel
-import com.example.mydividendreminder.util.CsvExportUtil
-import com.example.mydividendreminder.util.DividendExportHelper
 import com.example.mydividendreminder.util.NavigationHelper
 import android.widget.Toast
 import com.example.mydividendreminder.HelpActivity

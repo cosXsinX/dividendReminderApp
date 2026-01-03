@@ -46,17 +46,6 @@
             android:label="Products"
             android:theme="@style/Theme.MyDividendReminder" />
         <activity android:name=".HelpActivity" />
-        
-        <!-- File Provider for CSV export -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.mydividendreminder.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
     </application>
 
 </manifest>

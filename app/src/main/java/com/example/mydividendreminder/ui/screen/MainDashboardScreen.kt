@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Help
@@ -90,6 +89,10 @@ fun UpcomingDividendsSection(
 ) {
     val upcomingProducts = productsWithDividends.filter { productWithDividends ->
         productWithDividends.dividends.any { it.dividendDate >= LocalDate.now() }
+    }.sortedBy { productWithDividends ->
+        productWithDividends.dividends
+            .filter { it.dividendDate >= LocalDate.now() }
+            .minOfOrNull { it.dividendDate } ?: LocalDate.MAX
     }
     
     Card(

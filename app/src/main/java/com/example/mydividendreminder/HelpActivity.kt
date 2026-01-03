@@ -58,7 +58,6 @@ fun HelpScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text("Data Management", style = MaterialTheme.typography.titleLarge)
             HelpItem(icon = Icons.Filled.Add, label = "Add Dividend", description = "Quickly add a new dividend entry for any of your products.")
-            HelpItem(icon = Icons.Filled.FileDownload, label = "Export", description = "Export your dividend data to a CSV file for backup or analysis.")
         }
     }
 }

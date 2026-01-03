@@ -129,5 +129,4 @@ Potential improvements for the database implementation:
 2. **Search Functionality**: Add search by ticker or company name
 3. **Sorting Options**: Add sorting by dividend date, amount, or ticker
 4. **Notifications**: Integrate with Android notifications for dividend reminders
-5. **Data Import/Export**: Add CSV import/export functionality
-6. **Backup/Restore**: Implement database backup and restore features 
+5. **Backup/Restore**: Implement database backup and restore features 

@@ -64,11 +64,4 @@
     <string name="upcoming_dividends">Upcoming Dividends</string>
     <string name="today_exclamation">Today!</string>
     <string name="days_until_dividend">%d days until dividend</string>
-    
-    <!-- CSV Export -->
-    <string name="export_dividends">Export Dividends</string>
-    <string name="export_dividends_description">Export all dividends to CSV file</string>
-    <string name="no_dividends_to_export">No dividends to export</string>
-    <string name="failed_to_create_csv">Failed to create CSV file</string>
-    <string name="error_exporting_dividends">Error exporting dividends: %s</string>
 </resources>

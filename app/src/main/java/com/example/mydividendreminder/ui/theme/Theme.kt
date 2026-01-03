@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Sync
@@ -147,9 +146,6 @@ fun DefaultMainAppBar(
             }
             IconButton(onClick = navigationHelper.navigateToAddDividend()) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_dividend))
-            }
-            IconButton(onClick = navigationHelper.createExportDividendsFunction(productsWithDividends)) {
-                Icon(Icons.Filled.FileDownload, contentDescription = stringResource(R.string.export_dividends))
             }
         }
     )

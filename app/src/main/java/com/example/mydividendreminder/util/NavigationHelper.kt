@@ -61,23 +61,4 @@ class NavigationHelper(private val context: Context) {
             context.finish()
         }
     }
-    
-    /**
-     * Creates a function that exports dividends to CSV.
-     * This requires the productsWithDividends data which varies by screen.
-     */
-    fun createExportDividendsFunction(productsWithDividends: List<com.example.mydividendreminder.data.entity.ProductWithDividends>): () -> Unit = {
-        {
-            DividendExportHelper.exportDividendsToCsv(context, productsWithDividends)
-        }
-    }
-    
-    /**
-     * Creates a function that handles export functionality when no data is available.
-     * This is used in screens that don't have access to dividend data.
-     */
-    fun createEmptyExportFunction(): () -> Unit = {
-        // Handle export functionality when no data is available
-        // Could show a toast or dialog indicating no data to export
-    }
 } 
